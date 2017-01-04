@@ -1,6 +1,6 @@
-OBJS = queue.o restaurant.o tables.o
-SOURCE	= restaurant.c tables.c queue.c
-HEADER  = tables.h queue.h
+OBJS = restaurant.o
+SOURCE	= restaurant.c
+HEADER  = shared.h
 OUT  	= restaurant
 
 CC=gcc
@@ -13,12 +13,6 @@ restaurant: $(OBJS)
 
 restaurant.o: restaurant.c
 	$(CC) $(CFLAGS) restaurant.c
-
-tables.o: tables.c
-	$(CC) $(CFLAGS) tables.c
-
-queue.o: queue.c
-	$(CC) $(CFLAGS) queue.c
 
 clean:
 	rm -f $(OBJS) $(OUT)
