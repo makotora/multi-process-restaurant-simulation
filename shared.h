@@ -43,6 +43,19 @@ struct tables_struct
 	sem_t waiter_queue;
 };
 
+typedef struct statistics statistics;
+
+struct statistics
+{
+	sem_t stats_write;
+	int people_at_tables;
+	int people_at_bar;
+	int groups_serviced;
+	int groups_gone;
+	int income;
+	int groups_bored_waiting;
+};
+
 typedef struct shared_struct shared_struct;
 
 struct shared_struct
@@ -52,9 +65,11 @@ struct shared_struct
 	doorman_struct doorman;
 	door_struct door;
 	bar_struct bar;
-	tables_struct tables;	
+	tables_struct tables;
+	statistics stats;
 };
 
 
 void print_shared_struct(FILE * out,shared_struct * ss);
+void print_stats(FILE * out,shared_struct * ss);
 void print_shared_tables(FILE * out,table * tables, int tables_size);

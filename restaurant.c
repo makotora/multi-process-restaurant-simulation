@@ -6,9 +6,12 @@
 #include <sys/shm.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "shared.h"
 #include "functions.h"
+
+#define MAX_GROUP_SIZE 8
 
 
 int main(int argc, char const *argv[])
@@ -181,16 +184,27 @@ int main(int argc, char const *argv[])
 	shared_info->bar.group_size = -1;
 	sem_init(&shared_info->tables.waiter_busy,1,0);
 	sem_init(&shared_info->tables.waiter_queue,1,1);
+	sem_init(&shared_info->stats.stats_write,1,1);
+	shared_info->stats.people_at_tables = 0;
+	shared_info->stats.people_at_bar = 0;
+	shared_info->stats.groups_serviced = 0;
+	shared_info->stats.groups_gone = 0;
+	shared_info->stats.income = 0;
+	shared_info->stats.groups_bored_waiting = 0;
 	
 	/*Copy tables array in shared memory (after sharedStruct)*/
 	table * shared_tables = shared_memory + sizeof(shared_struct);
 	memcpy(shared_tables,tables,tables_num*sizeof(table));
 	
 	/*START CREATING OTHER PROCESSES*/
+	srand(time(NULL));
 	char * doorman_max_time = "3";
+	char * customer_max_time = "5";
+	char customer_people[10];
 	char id_string[20];
 	sprintf(id_string,"%d",shared_id);
 
+	/*Create doorman*/
 	if (fork() == 0)
 	{
 		free(tables);
@@ -209,13 +223,71 @@ int main(int argc, char const *argv[])
 		}
 	}
 
+	sleep(3);
+	/*Call customers*/
+	for (i=0;i<max_groups;i++)
+	{
+		int group_size;
+		group_size = ( rand() % MAX_GROUP_SIZE ) + 1;
+
+		if (fork() == 0)
+		{
+			free(tables);
+			free(table_capacities);
+
+			sprintf(customer_people,"%d",group_size);
+			
+			if (append_file == NULL)
+			{
+				execl("./customer","./customer", "-n", customer_people,"-d",customer_max_time, "-s", id_string,NULL);
+				perror("execl");
+			}
+			else
+			{
+				printf("%s %s %s %s\n",customer_people,customer_max_time,id_string,append_name);
+				execl("./customer","./customer", "-n", customer_people,"-d",customer_max_time, "-s", id_string,"-a", append_name, NULL);
+				perror("execl");
+			}
+		}
+	}
+
 	sem_wait(&shared_info->append_file);
-	fprintf(out, "---Restaurant is now open---\n");
+	fprintf(out, "\n---Restaurant is now open---\n");
 	print_shared_struct(out, shared_info);
 	print_shared_tables(out, shared_tables, tables_num);
+	fflush(out);
 	sem_post(&shared_info->append_file);
 
-	sleep(3);
+	/*Wait for all customers to leave*/
+	int pid;
+	i = 0;
+	while (i < max_groups)
+	{
+		pid = waitpid(-1,NULL,0);/*wait for any customer*/
+		if (pid == -1) 
+			continue;/*in case of an error message try again*/
+
+		sem_wait(&shared_info->append_file);
+		fprintf(out, "\nRestaurant: Customer %d left the restaurant\n",pid);
+		fflush(out);
+		sem_post(&shared_info->append_file);
+
+		i++;
+	}
+
+	/*Call doorman so he can go home*/
+	fflush(out);
+	sem_wait(&shared_info->append_file);
+	fprintf(out, "\nRestaurant calling doorman so he can go home\n");
+	sem_post(&shared_info->doorman.doorman_busy);
+	fflush(out);
+	sem_post(&shared_info->append_file);
+
+	pid = waitpid(-1,NULL,0);/*wait for doorman to leave the restaurant*/
+
+	/*All children processes have ended.No reason to use a semaphore*/
+	fprintf(out, "\nRestaurant closing!\n");
+	fflush(out);
 
 	sem_destroy(&shared_info->append_file);
 	sem_destroy(&shared_info->doorman.doorman_busy);

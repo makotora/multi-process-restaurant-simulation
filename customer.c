@@ -13,17 +13,18 @@
 
 int main(int argc, char const *argv[])
 {
-	int i,err,max_period,sleep_time,shared_id;
+	int i,err,people,max_period,sleep_time,shared_id,pid;
 	char * append_name = NULL;
 	FILE * append_file = NULL;
 	FILE * out;
+	people = -1;
 	max_period = -1;
 	shared_id = -1;
 
-	if (argc < 5)
+	if (argc < 7)
 	{
 		printf("Invalid number of arguments!\n");
-		printf("Usage: ./doorman -d time -s shmid [-a appendfile]\n");
+		printf("Usage: ./customer -n people -d period -s shmid [-a appendfile]\n");
 		return 1;
 	}
 	else
@@ -31,7 +32,12 @@ int main(int argc, char const *argv[])
 		i = 1;
 		while (i < argc)
 		{
-			if ( !strcmp(argv[i],"-d"))
+			if ( !strcmp(argv[i],"-n"))
+			{
+				people = atoi(argv[i+1]);
+				i += 2;
+			}
+			else if ( !strcmp(argv[i],"-d"))
 			{
 				max_period = atoi(argv[i+1]);
 				i += 2;
@@ -50,23 +56,29 @@ int main(int argc, char const *argv[])
 			else
 			{
 				printf("Invalid argument given: %s\n",argv[i]);
-				printf("Usage: ./doorman -d time -s shmid [-a appendfile]\n");
+				printf("Usage: ./customer -n people -d period -s shmid [-a appendfile]\n");
 				return 2;
 			}
 
 		}
 	}
 
-	if (max_period == -1)
+	if (people == -1)
+	{
+		printf("You didnt give the -n argument\n");
+		printf("Usage: ./customer -n people -d period -s shmid [-a appendfile]\n");
+		return 3;
+	}
+	else if (max_period == -1)
 	{
 		printf("You didnt give the -d argument\n");
-		printf("Usage: ./doorman -d time -s shmid [-a appendfile]\n");
+		printf("Usage: ./customer -n people -d period -s shmid [-a appendfile]\n");
 		return 3;
 	}
 	else if (shared_id == -1)
 	{
 		printf("You didnt give the -s argument\n");
-		printf("Usage: ./doorman -d time -s shmid [-a appendfile]\n");
+		printf("Usage: ./customer -n people -d period -s shmid [-a appendfile]\n");
 		return 3;
 	}
 
@@ -94,37 +106,26 @@ int main(int argc, char const *argv[])
 	shared_struct * shared_info = shared_memory;
 	table * shared_tables = shared_memory + sizeof(shared_struct);
 	
+	pid = getpid();
+	srand(time(NULL));	
 	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nDoorman arrived with max_time %d and shmdid %d\n",max_period,shared_id);
+	fprintf(out, "\nCustomer %d arrived with %d people max_period %d and shmdid %d\n",pid,people,max_period,shared_id);
 	print_shared_struct(out, shared_info);
 	print_shared_tables(out, shared_tables, shared_info->tables_num);
 	fflush(out);
 	sem_post(&shared_info->append_file);
 
-	/*wait for someone to call*/
-
 	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nDoorman is waiting for someone to call\n");
-	fflush(out);	
-	sem_post(&shared_info->append_file);
-
-	sem_wait(&shared_info->doorman.doorman_busy);
-	
-	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nDoorman called by someone\n");
-	fflush(out);
-	sem_post(&shared_info->append_file);
-
-	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nDoorman detaching from shared segment\n");
+	fprintf(out, "\nCustomer %d detaching from shared segment\n",pid);
 	fflush(out);
 	sem_post(&shared_info->append_file);
 	
 	err = shmdt (( void *) shared_memory ) ; /* Detach segment */
 	if ( err == -1)
-	{
+	{ 
 		perror ("shmdt") ;
 	}
 
 	return 0;
+
 }
