@@ -1,0 +1,1 @@
+int intToString(int integer,char **string_ptr);

@@ -48,6 +48,7 @@ typedef struct shared_struct shared_struct;
 struct shared_struct
 {
 	int tables_num;
+	sem_t append_file;
 	doorman_struct doorman;
 	door_struct door;
 	bar_struct bar;
@@ -55,5 +56,5 @@ struct shared_struct
 };
 
 
-void print_shared_struct(shared_struct * ss);
-void print_shared_tables(table * tables, int tables_size);
+void print_shared_struct(FILE * out,shared_struct * ss);
+void print_shared_tables(FILE * out,table * tables, int tables_size);

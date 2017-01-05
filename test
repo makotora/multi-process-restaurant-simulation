@@ -1,0 +1,56 @@
+---Doorman arrived with max_time 3 and shmdid 31227929---
+tables_num 4
+doorman_busy 0
+doorman_answer -3
+door_queue 1
+group_size -1
+bar_queue 1
+group_size -1
+waiter_busy 0
+waiter_queue 1
+Table 1:capacity 2, group_id -1, waiter_id -1, group_activity -1
+Table 2:capacity 4, group_id -1, waiter_id -1, group_activity -1
+Table 3:capacity 6, group_id -1, waiter_id -1, group_activity -1
+Table 4:capacity 8, group_id -1, waiter_id -1, group_activity -1
+---Restaurant is now open---
+tables_num 4
+doorman_busy 0
+doorman_answer -3
+door_queue 1
+group_size -1
+bar_queue 1
+group_size -1
+waiter_busy 0
+waiter_queue 1
+Table 1:capacity 2, group_id -1, waiter_id -1, group_activity -1
+Table 2:capacity 4, group_id -1, waiter_id -1, group_activity -1
+Table 3:capacity 6, group_id -1, waiter_id -1, group_activity -1
+Table 4:capacity 8, group_id -1, waiter_id -1, group_activity -1
+---Doorman arrived with max_time 3 and shmdid 32702471---
+tables_num 4
+doorman_busy 0
+doorman_answer -3
+door_queue 1
+group_size -1
+bar_queue 1
+group_size -1
+waiter_busy 0
+waiter_queue 1
+Table 1:capacity 2, group_id -1, waiter_id -1, group_activity -1
+Table 2:capacity 4, group_id -1, waiter_id -1, group_activity -1
+Table 3:capacity 6, group_id -1, waiter_id -1, group_activity -1
+Table 4:capacity 8, group_id -1, waiter_id -1, group_activity -1
+---Restaurant is now open---
+tables_num 4
+doorman_busy 0
+doorman_answer -3
+door_queue 1
+group_size -1
+bar_queue 1
+group_size -1
+waiter_busy 0
+waiter_queue 1
+Table 1:capacity 2, group_id -1, waiter_id -1, group_activity -1
+Table 2:capacity 4, group_id -1, waiter_id -1, group_activity -1
+Table 3:capacity 6, group_id -1, waiter_id -1, group_activity -1
+Table 4:capacity 8, group_id -1, waiter_id -1, group_activity -1

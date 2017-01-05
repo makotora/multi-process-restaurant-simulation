@@ -8,26 +8,32 @@
 #include <unistd.h>
 
 #include "shared.h"
+#include "functions.h"
 
 
 int main(int argc, char const *argv[])
 {
 
 	int * table_capacities;
-	int i,max_groups,closing_time,tables_num,bar_size,waiters,shared_id;
-	char * config_name;
+	int i,err,max_groups,closing_time,tables_num,bar_size,waiters,shared_id;
+	char * config_name = NULL;
+	char * append_name = NULL;
 	FILE * config_file;
+	FILE * append_file;
+	FILE * out;
+	max_groups = -1;
+	closing_time = -1;
 
-	if (argc != 7)
+	if (argc < 7)
 	{
 		printf("Invalid number of arguments!\n");
-		printf("Usage: ./restaurant -n customers -l configfile -d time\n");
+		printf("Usage: ./restaurant -n customers -l configfile -d time [-a appendfile]\n");
 		return 1;
 	}
 	else
 	{
 		i = 1;
-		while (i < 7)
+		while (i < argc)
 		{
 			if ( !strcmp(argv[i],"-n"))
 			{
@@ -45,15 +51,53 @@ int main(int argc, char const *argv[])
 				closing_time = atoi(argv[i+1]);
 				i += 2;
 			}
+			else if ( !strcmp(argv[i],"-a"))
+			{
+				append_name = malloc( (strlen(argv[i+1]) + 1) * sizeof(char) );
+				strcpy(append_name,argv[i+1]);
+				i += 2;
+			}
 			else
 			{
 				printf("Invalid argument given: %s\n",argv[i]);
-				printf("Usage: ./restaurant -n customers -l configfile -d time\n");
+				printf("Usage: ./restaurant -n customers -l configfile -d time [-a appendfile]\n");
 				return 2;
 			}
 
 		}
 	}
+
+	if (max_groups == -1)
+	{
+		printf("You didnt give the -n argument\n");
+		printf("Usage: ./restaurant -n customers -l configfile -d time [-a appendfile]\n");
+		return 3;
+	}
+	else if (config_name == NULL)
+	{
+		printf("You didnt give the -l argument\n");	
+		printf("Usage: ./restaurant -n customers -l configfile -d time [-a appendfile]\n");
+		return 3;
+	}
+	else if (closing_time == -1)
+	{
+		printf("You didnt give the -d argument\n");
+		printf("Usage: ./restaurant -n customers -l configfile -d time [-a appendfile]\n");
+		return 3;
+	}
+
+	if (append_name != NULL)
+	{
+		append_file = fopen(append_name,"a");
+		if (append_file == NULL)
+		{
+			fprintf(stderr, "Error opening appendfile '%s'\n",append_name);
+			return 4;
+		}
+		out = append_file;
+	}
+	else
+		out = stderr;
 
 	printf("Arguments given: n %d l %s d %d\n",max_groups,config_name,closing_time);
 
@@ -93,6 +137,7 @@ int main(int argc, char const *argv[])
 	waiters = atoi( token );
 
 
+	fclose(config_file);
 	printf("Config file info read.\n");
 	printf("tables %d\n",tables_num);
 	for (i=0;i<tables_num;i++)
@@ -115,7 +160,6 @@ int main(int argc, char const *argv[])
 	printf("--DONE INITIALISING TABLES--\n\n");
 
 	/*Create shared memory*/
-	
 	shared_id = shmget(IPC_PRIVATE,sizeof(shared_struct)+tables_num*sizeof(int),0666);
 	if (shared_id == -1)
 		perror("shmget");
@@ -123,7 +167,11 @@ int main(int argc, char const *argv[])
 	/*Initialise shared memory (semaphores too)*/
 
 	void * shared_memory = (void *) shmat(shared_id, (void*)0, 0);
+	if ( (int) shared_memory == -1)
+		perror("shmat");
+
 	shared_struct * shared_info = shared_memory;
+	sem_init(&shared_info->append_file,1,1);
 	shared_info->tables_num = tables_num;
 	sem_init(&shared_info->doorman.doorman_busy,1,0);
 	shared_info->doorman.answer = -3;
@@ -137,9 +185,50 @@ int main(int argc, char const *argv[])
 	/*Copy tables array in shared memory (after sharedStruct)*/
 	table * shared_tables = shared_memory + sizeof(shared_struct);
 	memcpy(shared_tables,tables,tables_num*sizeof(table));
-	print_shared_struct(shared_info);
-	print_shared_tables(shared_tables, tables_num);
+	
+	/*START CREATING OTHER PROCESSES*/
+	char * doorman_max_time = "3";
+	char id_string[20];
+	sprintf(id_string,"%d",shared_id);
 
+	if (fork() == 0)
+	{
+		free(tables);
+		free(table_capacities);
+		
+		if (append_file == NULL)
+		{
+			execl("./doorman","./doorman", "-d",doorman_max_time, "-s", id_string,NULL);
+			perror("execl");
+		}
+		else
+		{
+			printf("%s %s %s\n",doorman_max_time,id_string,append_name);
+			execl("./doorman","./doorman", "-d",doorman_max_time, "-s", id_string,"-a", append_name, NULL);
+			perror("execl");
+		}
+	}
+
+	sem_wait(&shared_info->append_file);
+	fprintf(out, "---Restaurant is now open---\n");
+	print_shared_struct(out, shared_info);
+	print_shared_tables(out, shared_tables, tables_num);
+	sem_post(&shared_info->append_file);
+
+	sleep(3);
+
+	sem_destroy(&shared_info->append_file);
+	sem_destroy(&shared_info->doorman.doorman_busy);
+	sem_destroy(&shared_info->door.door_queue);
+	sem_destroy(&shared_info->bar.bar_queue);
+	sem_destroy(&shared_info->tables.waiter_busy);
+	sem_destroy(&shared_info->tables.waiter_queue);
+	
+
+	err = shmctl ( shared_id , IPC_RMID , 0) ;
+	if ( err == -1) 
+		perror ("shmctl");		
+	
 	free(tables);
 	free(table_capacities);
 
