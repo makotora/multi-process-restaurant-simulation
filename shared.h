@@ -16,6 +16,7 @@ typedef struct doorman_struct doorman_struct;
 struct doorman_struct
 {
 	sem_t doorman_busy;
+	sem_t doorman_answer;
 	int answer;
 };
 
@@ -32,6 +33,7 @@ typedef struct bar_struct bar_struct;
 struct bar_struct
 {
 	sem_t bar_queue;
+	int capacity;
 	int group_size;
 };
 
@@ -61,6 +63,7 @@ typedef struct shared_struct shared_struct;
 struct shared_struct
 {
 	int tables_num;
+	int restaurant_open;
 	sem_t append_file;
 	doorman_struct doorman;
 	door_struct door;

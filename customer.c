@@ -13,7 +13,7 @@
 
 int main(int argc, char const *argv[])
 {
-	int i,err,people,max_period,sleep_time,shared_id,pid;
+	int i,err,people,max_period,eat_time,shared_id,pid;
 	char * append_name = NULL;
 	FILE * append_file = NULL;
 	FILE * out;
@@ -110,13 +110,86 @@ int main(int argc, char const *argv[])
 	srand(time(NULL));	
 	sem_wait(&shared_info->append_file);
 	fprintf(out, "\nCustomer %d arrived with %d people max_period %d and shmdid %d\n",pid,people,max_period,shared_id);
-	print_shared_struct(out, shared_info);
-	print_shared_tables(out, shared_tables, shared_info->tables_num);
+	// print_shared_struct(out, shared_info);
+	// print_shared_tables(out, shared_tables, shared_info->tables_num);
 	fflush(out);
 	sem_post(&shared_info->append_file);
 
+	/*wait at line,state size,call doorman*/
 	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nCustomer %d detaching from shared segment\n",pid);
+	fprintf(out, "\nCustomer %d waiting at queue\n",pid);
+	fflush(out);
+	sem_post(&shared_info->append_file);
+	
+	sem_wait(&shared_info->door.door_queue);
+
+	shared_info->door.group_size = people;
+	sem_post(&shared_info->doorman.doorman_busy);
+
+	sem_wait(&shared_info->append_file);
+	fprintf(out, "\nCustomer %d told doorman that his size is %d.Waiting for doorman's answer\n",pid,people);
+	fflush(out);
+	sem_post(&shared_info->append_file);
+	
+	/*Wait for an answer from doorman and let the next customer to ask doorman as well*/
+	sem_wait(&shared_info->doorman.doorman_answer);
+
+	int answer = shared_info->doorman.answer;
+	sem_wait(&shared_info->append_file);
+	fprintf(out, "\nCustomer %d got %d as answer and is leaving the queue\n",pid,answer);
+	fflush(out);
+	sem_post(&shared_info->append_file);
+
+	shared_info->door.group_size = -1;/*reset group_size to -1 and leave queue*/
+	sem_post(&shared_info->door.door_queue);
+
+	if (answer >= 0)
+	{
+		eat_time = (rand() % max_period) + 1;
+		shared_tables[answer].group_id = pid; /*sit at your table*/
+		sem_wait(&shared_info->append_file);
+		fprintf(out, "\nCustomer %d is now at table %d\n",pid,answer);
+		fprintf(out, "\nCustomer %d will leave after %d seconds\n",pid,eat_time);
+		fflush(out);
+		sem_post(&shared_info->append_file);
+		sleep(eat_time);
+		/*Note that you left (no waiters for now)*/
+		shared_tables[answer].group_id = -1;
+		
+		sem_wait(&shared_info->stats.stats_write);
+		shared_info->stats.people_at_tables -= 1;
+		shared_info->stats.groups_serviced += 1;
+		sem_post(&shared_info->stats.stats_write);
+	}
+	else if (answer == -1)
+	{
+		sem_wait(&shared_info->append_file);
+		fprintf(out, "\nCustomer %d is going to bar\n",pid);
+		fflush(out);
+		sem_post(&shared_info->append_file);
+		/*TO BE CONTINUED*/
+	}
+	else if (answer == -2)
+	{
+
+		sem_wait(&shared_info->append_file);
+		fprintf(out, "\nCustomer %d is leaving because restaurant is full\n",pid);
+		fflush(out);
+		sem_post(&shared_info->append_file);
+	}
+	else
+	{/*this should never happen*/
+		sem_wait(&shared_info->append_file);
+		fprintf(out, "\n<!>Customer %d got a strange answer.He is angry and leaving the restaurant!\n",pid);
+		fflush(out);
+		sem_post(&shared_info->append_file);
+	}
+
+
+
+
+	sem_wait(&shared_info->append_file);
+	fprintf(out, "\nCustomer %d leaving the restaurant\n",pid);
 	fflush(out);
 	sem_post(&shared_info->append_file);
 	

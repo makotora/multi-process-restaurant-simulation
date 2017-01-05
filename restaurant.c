@@ -5,6 +5,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -174,14 +175,17 @@ int main(int argc, char const *argv[])
 		perror("shmat");
 
 	shared_struct * shared_info = shared_memory;
-	sem_init(&shared_info->append_file,1,1);
 	shared_info->tables_num = tables_num;
+	shared_info->restaurant_open = 1;
+	sem_init(&shared_info->append_file,1,1);
 	sem_init(&shared_info->doorman.doorman_busy,1,0);
+	sem_init(&shared_info->doorman.doorman_answer,1,0);
 	shared_info->doorman.answer = -3;
 	sem_init(&shared_info->door.door_queue,1,1);
 	shared_info->door.group_size = -1;
 	sem_init(&shared_info->bar.bar_queue,1,1);
 	shared_info->bar.group_size = -1;
+	shared_info->bar.capacity = bar_size;
 	sem_init(&shared_info->tables.waiter_busy,1,0);
 	sem_init(&shared_info->tables.waiter_queue,1,1);
 	sem_init(&shared_info->stats.stats_write,1,1);
@@ -199,8 +203,6 @@ int main(int argc, char const *argv[])
 	/*START CREATING OTHER PROCESSES*/
 	srand(time(NULL));
 	char * doorman_max_time = "3";
-	char * customer_max_time = "5";
-	char customer_people[10];
 	char id_string[20];
 	sprintf(id_string,"%d",shared_id);
 
@@ -223,8 +225,34 @@ int main(int argc, char const *argv[])
 		}
 	}
 
-	sleep(3);
+	/*Call waiters*/
+	char * waiter_max_time = "1";
+	char * waiter_moneyamount = "20";
+	for (i=0;i<waiters;i++)
+	{
+
+		if (fork() == 0)
+		{
+			free(tables);
+			free(table_capacities);
+
+			if (append_file == NULL)
+			{
+				execl("./waiter","./waiter", "-d", waiter_max_time,"-m", waiter_moneyamount, "-s", id_string,NULL);
+				perror("execl");
+			}
+			else
+			{
+				printf("%s %s %s %s\n",waiter_max_time,waiter_moneyamount,id_string,append_name);
+				execl("./waiter","./waiter", "-d", waiter_max_time,"-m", waiter_moneyamount, "-s", id_string,"-a", append_name, NULL);
+				perror("execl");
+			}
+		}
+	}
+
 	/*Call customers*/
+	char * customer_max_time = "1";
+	char customer_people[10];
 	for (i=0;i<max_groups;i++)
 	{
 		int group_size;
@@ -279,18 +307,22 @@ int main(int argc, char const *argv[])
 	fflush(out);
 	sem_wait(&shared_info->append_file);
 	fprintf(out, "\nRestaurant calling doorman so he can go home\n");
-	sem_post(&shared_info->doorman.doorman_busy);
 	fflush(out);
 	sem_post(&shared_info->append_file);
+
+	shared_info->restaurant_open = 0;
+	sem_post(&shared_info->doorman.doorman_busy);
 
 	pid = waitpid(-1,NULL,0);/*wait for doorman to leave the restaurant*/
 
 	/*All children processes have ended.No reason to use a semaphore*/
 	fprintf(out, "\nRestaurant closing!\n");
+	print_stats(out,shared_info);
 	fflush(out);
 
 	sem_destroy(&shared_info->append_file);
 	sem_destroy(&shared_info->doorman.doorman_busy);
+	sem_destroy(&shared_info->doorman.doorman_answer);
 	sem_destroy(&shared_info->door.door_queue);
 	sem_destroy(&shared_info->bar.bar_queue);
 	sem_destroy(&shared_info->tables.waiter_busy);

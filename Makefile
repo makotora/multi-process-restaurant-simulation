@@ -1,7 +1,7 @@
 OBJS = restaurant.o shared.o functions.o
-EOBJS = doorman.o customer.o
-EXECS = doorman customer
-SOURCE	= restaurant.c shared.c doorman.c customer.c functions.c
+EOBJS = doorman.o customer.o waiter.o
+EXECS = doorman customer waiter
+SOURCE	= restaurant.c shared.c doorman.c customer.c functions.c waiter.c
 HEADER  = shared.h functions.h
 OUT  	= restaurant
 
@@ -19,6 +19,9 @@ restaurant.o: restaurant.c
 doorman: shared.o doorman.o
 	$(CC) $(LFLAGS) shared.o doorman.o -o doorman
 
+waiter: shared.o waiter.o
+	$(CC) $(LFLAGS) shared.o waiter.o -o waiter
+
 customer: shared.o customer.o
 	$(CC) $(LFLAGS) shared.o customer.o -o customer
 
@@ -27,6 +30,9 @@ shared.o: shared.c
 
 doorman.o: doorman.c
 	$(CC) $(CFLAGS) doorman.c
+
+waiter.o: waiter.c
+	$(CC) $(CFLAGS) waiter.c
 
 customer.o: customer.c
 	$(CC) $(CFLAGS) customer.c
