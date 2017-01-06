@@ -19,16 +19,12 @@ groups_serviced 0
 groups_gone 0
 income 0
 groups_bored_waiting 0
-Table 0:capacity 2, group_id -1, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id -1, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id -1, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id -1, waiter_id -1, group_activity -1
+Table 0:capacity 2, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 1:capacity 4, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 2:capacity 6, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 3:capacity 8, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
 
-Doorman arrived with max_time 3 and shmdid 44630048
-
-Doorman is waiting for someone to call him
-
-Waiter 7207 arrived with max_period 1 , max_money 20 and shmdid 44630048
+Waiter 13054 arrived with max_period 5 , max_money 20 and shmdid 32800793
 tables_num 4
 restaurant_open 1
 append_file 0
@@ -48,207 +44,242 @@ groups_serviced 0
 groups_gone 0
 income 0
 groups_bored_waiting 0
-Table 0:capacity 2, group_id -1, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id -1, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id -1, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id -1, waiter_id -1, group_activity -1
+Table 0:capacity 2, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 1:capacity 4, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 2:capacity 6, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 3:capacity 8, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
 
-Customer 7209 arrived with 6 people max_period 1 and shmdid 44630048
+Waiter 13054 is waiting for someone to call him
 
-Customer 7209 waiting at queue
+Customer 13058 arrived with 3 people max_period 1 and shmdid 32800793
 
-Customer 7209 told doorman that his size is 6.Waiting for doorman's answer
+Customer 13058 waiting at queue
 
-Doorman called by someone
-Table 0:capacity 2, group_id -1, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id -1, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id -1, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id -1, waiter_id -1, group_activity -1
+Customer 13058 told doorman that his size is 3.Waiting for doorman's answer
 
-Doorman found table 2 for customer with size 6
+Customer 13057 arrived with 2 people max_period 1 and shmdid 32800793
 
-Doorman is waiting for someone to call him
+Customer 13057 waiting at queue
 
-Customer 7209 got 2 as answer and is leaving the queue
+Customer 13055 arrived with 7 people max_period 1 and shmdid 32800793
 
-Customer 7209 is now at table 2
+Customer 13055 waiting at queue
 
-Customer 7209 will leave after 1 seconds
+Customer 13056 arrived with 2 people max_period 1 and shmdid 32800793
 
-Customer 7213 arrived with 2 people max_period 1 and shmdid 44630048
+Customer 13056 waiting at queue
 
-Customer 7213 waiting at queue
+Customer 13058 got 1 as answer and is leaving the queue
 
-Doorman called by someone
-Table 0:capacity 2, group_id -1, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id -1, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id 7209, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id -1, waiter_id -1, group_activity -1
+Customer 13058 is going to table 1
 
-Doorman found table 0 for customer with size 2
+Customer 13058 is now at table 1
 
-Doorman is waiting for someone to call him
+Customer 13058 (table 1) wants to order
 
-Customer 7213 told doorman that his size is 2.Waiting for doorman's answer
+Waiter 13054 was called by someone
 
-Customer 7213 got 0 as answer and is leaving the queue
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 1:capacity 4, group_id 13058, group_size 3, waiter_id -1, group_activity 0 table_service 0
+Table 2:capacity 6, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 3:capacity 8, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
 
-Customer 7213 is now at table 0
+Waiter 13054 took over table 1
 
-Customer 7213 will leave after 1 seconds
+Customer 13057 told doorman that his size is 2.Waiting for doorman's answer
 
-Customer 7212 arrived with 2 people max_period 1 and shmdid 44630048
+Waiter 13054 took order from table 1 and brought their food
 
-Customer 7212 waiting at queue
+Waiter 13054 is waiting for someone to call him
 
-Doorman called by someone
-Table 0:capacity 2, group_id 7213, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id -1, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id 7209, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id -1, waiter_id -1, group_activity -1
+Customer 13057 got 0 as answer and is leaving the queue
 
-Doorman found table 1 for customer with size 2
+Customer 13057 is going to table 0
 
-Doorman is waiting for someone to call him
+Customer 13057 is now at table 0
 
-Customer 7212 told doorman that his size is 2.Waiting for doorman's answer
+Customer 13057 (table 0) wants to order
 
-Customer 7212 got 1 as answer and is leaving the queue
+Customer 13055 told doorman that his size is 7.Waiting for doorman's answer
 
-Customer 7212 is now at table 1
+Waiter 13054 was called by someone
 
-Customer 7212 will leave after 1 seconds
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id 13057, group_size 2, waiter_id -1, group_activity 0 table_service 0
+Table 1:capacity 4, group_id 13058, group_size 3, waiter_id 13054, group_activity 1 table_service 1
+Table 2:capacity 6, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 3:capacity 8, group_id -2, group_size 7, waiter_id -1, group_activity -1 table_service 0
 
-Customer 7211 arrived with 5 people max_period 1 and shmdid 44630048
+Waiter 13054 took over table 0
 
-Customer 7211 waiting at queue
+Customer 13058 (table 1) wants to pay
 
-Doorman called by someone
-Table 0:capacity 2, group_id 7213, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id 7212, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id 7209, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id -1, waiter_id -1, group_activity -1
+Waiter 13054 took order from table 0 and brought their food
 
-Doorman found table 3 for customer with size 5
+Waiter 13054 is waiting for someone to call him
 
-Doorman is waiting for someone to call him
+Waiter 13054 was called by someone
 
-Customer 7210 arrived with 7 people max_period 1 and shmdid 44630048
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id 13057, group_size 2, waiter_id 13054, group_activity 1 table_service 1
+Table 1:capacity 4, group_id 13058, group_size 3, waiter_id 13054, group_activity 2 table_service 0
+Table 2:capacity 6, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 3:capacity 8, group_id -2, group_size 7, waiter_id -1, group_activity -1 table_service 0
 
-Customer 7210 waiting at queue
+Customer 13055 got 3 as answer and is leaving the queue
 
-Customer 7211 told doorman that his size is 5.Waiting for doorman's answer
+Customer 13055 is going to table 3
 
-Customer 7211 got 3 as answer and is leaving the queue
+Customer 13055 is now at table 3
 
-Customer 7211 is now at table 3
+Customer 13055 (table 3) wants to order
 
-Customer 7211 will leave after 1 seconds
+Customer 13056 told doorman that his size is 2.Waiting for doorman's answer
 
-Doorman called by someone
-Table 0:capacity 2, group_id 7213, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id 7212, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id 7209, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id 7211, waiter_id -1, group_activity -1
+Customer 13057 (table 0) wants to pay
 
-Doorman tells customer that there is no table and no room in the bar
+Customer 13056 got 2 as answer and is leaving the queue
 
-Doorman is waiting for someone to call him
+Customer 13056 is going to table 2
 
-Customer 7210 told doorman that his size is 7.Waiting for doorman's answer
+Customer 13056 is now at table 2
 
-Customer 7210 got -2 as answer and is leaving the queue
+Customer 13056 (table 2) wants to order
 
-Customer 7210 is leaving because restaurant is full
-
-Customer 7210 leaving the restaurant
-
-Customer 7208 arrived with 6 people max_period 1 and shmdid 44630048
-
-Customer 7208 waiting at queue
-
-Doorman called by someone
-Table 0:capacity 2, group_id 7213, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id 7212, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id 7209, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id 7211, waiter_id -1, group_activity -1
-
-Doorman tells customer that there is no table and no room in the bar
-
-Doorman is waiting for someone to call him
-
-Customer 7208 told doorman that his size is 6.Waiting for doorman's answer
-
-Customer 7208 got -2 as answer and is leaving the queue
-
-Customer 7208 is leaving because restaurant is full
-
-Customer 7208 leaving the restaurant
-
-Restaurant: Customer 7210 left the restaurant
-
-Waiter 7206 arrived with max_period 1 , max_money 20 and shmdid 44630048
-tables_num 4
-restaurant_open 1
-append_file 0
-doorman_busy 0
-doorman_answer 0
-answer -2
-door_queue 1
-door_group_size -1
-bar_queue 1
-bar_group_size -1
-waiter_busy 0
-waiter_queue 1
-stats_write 1
-people_at_tables 15
-people_at_bar 0
-groups_serviced 0
-groups_gone 2
-income 0
-groups_bored_waiting 0
-Table 0:capacity 2, group_id 7213, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id 7212, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id 7209, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id 7211, waiter_id -1, group_activity -1
-
-Restaurant: Customer 7208 left the restaurant
-
-Customer 7209 leaving the restaurant
-
-Restaurant: Customer 7209 left the restaurant
-
-Customer 7213 leaving the restaurant
-
-Restaurant: Customer 7213 left the restaurant
-
-Customer 7212 leaving the restaurant
-
-Restaurant: Customer 7212 left the restaurant
-
-Customer 7211 leaving the restaurant
-
-Restaurant: Customer 7211 left the restaurant
-
-Restaurant calling doorman so he can go home
-
-Doorman called by someone
-Table 0:capacity 2, group_id -1, waiter_id -1, group_activity -1
-Table 1:capacity 4, group_id -1, waiter_id -1, group_activity -1
-Table 2:capacity 6, group_id -1, waiter_id -1, group_activity -1
-Table 3:capacity 8, group_id -1, waiter_id -1, group_activity -1
-
-Doorman leaving the restaurant
-
-Restaurant closing!
+Waiter 13054 brought the check and got paid 19$ from table 1
 Printing restaurant statistics.
 People at tables: 11
 People at bar: 0
-Groups serviced: 4
-Groups gone: 2
-Income: 0
+Groups serviced: 2
+Groups gone: 1
+Income: 19
 Groups bored waiting: 0
 
-Doorman leaving the restaurant
+Waiter 13054 is waiting for someone to call him
 
-Doorman leaving the restaurant
+Waiter 13054 was called by someone
+
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id 13057, group_size 2, waiter_id 13054, group_activity 2 table_service 0
+Table 1:capacity 4, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 2:capacity 6, group_id 13056, group_size 2, waiter_id -1, group_activity 0 table_service 0
+Table 3:capacity 8, group_id 13055, group_size 7, waiter_id -1, group_activity 0 table_service 0
+
+Customer 13058 leaving the restaurant
+
+Restaurant: Customer 13058 left the restaurant
+
+Waiter 13054 brought the check and got paid 4$ from table 0
+Printing restaurant statistics.
+People at tables: 9
+People at bar: 0
+Groups serviced: 2
+Groups gone: 2
+Income: 23
+Groups bored waiting: 0
+
+Waiter 13054 is waiting for someone to call him
+
+Waiter 13054 was called by someone
+
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 1
+Table 1:capacity 4, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 2:capacity 6, group_id 13056, group_size 2, waiter_id -1, group_activity 0 table_service 0
+Table 3:capacity 8, group_id 13055, group_size 7, waiter_id -1, group_activity 0 table_service 0
+
+Waiter 13054 took over table 2
+
+Customer 13057 leaving the restaurant
+
+Restaurant: Customer 13057 left the restaurant
+
+Waiter 13054 took order from table 2 and brought their food
+
+Waiter 13054 is waiting for someone to call him
+
+Waiter 13054 was called by someone
+
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 1:capacity 4, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 2:capacity 6, group_id 13056, group_size 2, waiter_id 13054, group_activity 1 table_service 1
+Table 3:capacity 8, group_id 13055, group_size 7, waiter_id -1, group_activity 0 table_service 0
+
+Waiter 13054 took over table 3
+
+Customer 13056 (table 2) wants to pay
+
+Waiter 13054 took order from table 3 and brought their food
+
+Waiter 13054 is waiting for someone to call him
+
+Waiter 13054 was called by someone
+
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 1:capacity 4, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 2:capacity 6, group_id 13056, group_size 2, waiter_id 13054, group_activity 2 table_service 0
+Table 3:capacity 8, group_id 13055, group_size 7, waiter_id 13054, group_activity 1 table_service 1
+
+Customer 13055 (table 3) wants to pay
+
+Waiter 13054 brought the check and got paid 2$ from table 2
+Printing restaurant statistics.
+People at tables: 7
+People at bar: 0
+Groups serviced: 4
+Groups gone: 3
+Income: 25
+Groups bored waiting: 0
+
+Waiter 13054 is waiting for someone to call him
+
+Waiter 13054 was called by someone
+
+Waiter 13054 is looking at tables
+Table 0:capacity 2, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 1:capacity 4, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 2:capacity 6, group_id -1, group_size -1, waiter_id -1, group_activity -1 table_service 0
+Table 3:capacity 8, group_id 13055, group_size 7, waiter_id 13054, group_activity 2 table_service 0
+
+Customer 13056 leaving the restaurant
+
+Restaurant: Customer 13056 left the restaurant
+
+Waiter 13054 brought the check and got paid 8$ from table 3
+Printing restaurant statistics.
+People at tables: 0
+People at bar: 0
+Groups serviced: 4
+Groups gone: 4
+Income: 33
+Groups bored waiting: 0
+
+Waiter 13054 is waiting for someone to call him
+
+Customer 13055 leaving the restaurant
+
+Restaurant: Customer 13055 left the restaurant
+
+Restaurant calling doorman so he can go home
+
+Restaurant: Doorman left the restaurant
+
+Restaurant calling waiters so they can go home
+
+Waiter 13054 was called by someone
+
+Waiter 13054 leaving the restaurant
+
+Restaurant: Waiter 13054 left the restaurant
+
+Restaurant closing!
+Printing restaurant statistics.
+People at tables: 0
+People at bar: 0
+Groups serviced: 4
+Groups gone: 4
+Income: 33
+Groups bored waiting: 0

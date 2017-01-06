@@ -13,7 +13,7 @@
 
 int main(int argc, char const *argv[])
 {
-	int i,err,max_period,sleep_time,shared_id;
+	int i,err,max_period,shared_id;
 	char * append_name = NULL;
 	FILE * append_file = NULL;
 	FILE * out;
@@ -82,7 +82,7 @@ int main(int argc, char const *argv[])
 	}
 	else
 	{
-		out = stderr;
+		out = stdout;
 	}
 
 	void * shared_memory = (void *) shmat(shared_id, (void*)0, 0);
@@ -96,18 +96,19 @@ int main(int argc, char const *argv[])
 	int tables_num = shared_info->tables_num;
 	
 	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nDoorman arrived with max_time %d and shmdid %d\n",max_period,shared_id);
+	fprintf(out, "\nDoorman arrived with max_period %d and shmdid %d\n",max_period,shared_id);
 	// print_shared_struct(out, shared_info);
 	// print_shared_tables(out, shared_tables, shared_info->tables_num);
 	fflush(out);
 	sem_post(&shared_info->append_file);
 
+	srand(time(NULL));
 
 	while (1)
 	{/*when doorman has nothing to do its closing time and we break*/
 		/*wait for someone to call*/
 		int group_size,best_table,best_table_size,table_size,bar_space;
-		
+		int action_period;
 		sem_wait(&shared_info->append_file);
 		fprintf(out, "\nDoorman is waiting for someone to call him\n");
 		fflush(out);	
@@ -120,15 +121,21 @@ int main(int argc, char const *argv[])
 		group_size = shared_info->door.group_size;
 		
 		sem_wait(&shared_info->append_file);
-		fprintf(out, "\nDoorman called by someone\n");
-		//print_shared_struct(out, shared_info);
-		print_shared_tables(out, shared_tables, shared_info->tables_num);
+		fprintf(out, "\nDoorman was called by someone\n");
 		fflush(out);
 		sem_post(&shared_info->append_file);
 
 		/*If restaurant is closed.Go home*/
 		if (shared_info->restaurant_open == 0)
 			break;
+
+		sem_wait(&shared_info->append_file);
+		fprintf(out, "\nDoorman is looking at tables\n");
+		//print_shared_struct(out, shared_info);
+		print_shared_tables(out, shared_tables, shared_info->tables_num);
+		fflush(out);
+		sem_post(&shared_info->append_file);
+		action_period = ( rand() % max_period ) + 1;
 
 		/*try finding a table for this group*/
 		if (group_size > 0)
@@ -159,6 +166,8 @@ int main(int argc, char const *argv[])
 				sem_post(&shared_info->append_file);
 
 				shared_info->doorman.answer = best_table;
+				shared_tables[best_table].group_id = -2;/*Note that someone is about to sit there*/
+				shared_tables[best_table].group_size = group_size;/*Note the size of the group about to sit*/
 
 				sem_wait(&shared_info->stats.stats_write);
 				shared_info->stats.people_at_tables += group_size;
@@ -194,6 +203,7 @@ int main(int argc, char const *argv[])
 					sem_post(&shared_info->append_file);					
 				}
 			}
+			sleep(action_period);
 			sem_post(&shared_info->doorman.doorman_answer);/*deliver answer*/
 
 		}

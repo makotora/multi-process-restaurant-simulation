@@ -5,9 +5,11 @@ typedef struct table table;
 struct table
 {
 	int group_id;/*for the doorman to set,and waiter to unset*/
-	int group_activity;/*for the group to change,-1:None 0:ordering 1:eating 2:ready to pay*/
+	int group_size;/*for the doorman to set,and waiter to unset*/
+	int group_activity;/*for the group and its waiter to change,-1:None 0:ready to order 1:eating 2:ready to pay*/
 	int waiter_id;/*for the first waiter coming to set,and unset*/
 	int capacity;/*initialized remains the same*/
+	sem_t table_service;
 };
 
 
@@ -42,7 +44,7 @@ typedef struct tables_struct tables_struct;
 struct tables_struct
 {
 	sem_t waiter_busy;
-	sem_t waiter_queue;
+	sem_t waiter_table;
 };
 
 typedef struct statistics statistics;

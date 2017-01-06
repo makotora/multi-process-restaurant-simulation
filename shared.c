@@ -25,7 +25,7 @@ void print_shared_struct(FILE * out, shared_struct * ss)
 	fprintf(out, "bar_group_size %d\n", ss->bar.group_size);
 	sem_getvalue(&ss->tables.waiter_busy,&sem);
 	fprintf(out, "waiter_busy %d\n", sem);
-	sem_getvalue(&ss->tables.waiter_queue,&sem);
+	sem_getvalue(&ss->tables.waiter_table,&sem);
 	fprintf(out, "waiter_queue %d\n", sem);
 	sem_getvalue(&ss->stats.stats_write,&sem);
 	fprintf(out, "stats_write %d\n", sem);
@@ -53,10 +53,11 @@ void print_stats(FILE * out,shared_struct * ss)
 
 void print_shared_tables(FILE * out, table * tables, int tables_num)
 {
-	int i;
+	int i,sem;
 	for (i=0;i<tables_num;i++)
 	{
-		fprintf(out, "Table %d:capacity %d, group_id %d, waiter_id %d, group_activity %d\n"
-			,i,tables[i].capacity,tables[i].group_id,tables[i].waiter_id,tables[i].group_activity);
+		sem_getvalue(&(tables[i].table_service),&sem);
+		fprintf(out, "Table %d:capacity %d, group_id %d, group_size %d, waiter_id %d, group_activity %d table_service %d\n"
+			,i,tables[i].capacity,tables[i].group_id,tables[i].group_size,tables[i].waiter_id,tables[i].group_activity,sem);
 	}
 }

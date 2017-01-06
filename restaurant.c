@@ -20,6 +20,10 @@ int main(int argc, char const *argv[])
 
 	int * table_capacities;
 	int i,err,max_groups,closing_time,tables_num,bar_size,waiters,shared_id;
+	int doorman_no_prints = 1,
+		waiter_no_prints = 0,
+	   	customer_no_prints = 0;
+
 	char * config_name = NULL;
 	char * append_name = NULL;
 	FILE * config_file;
@@ -101,7 +105,7 @@ int main(int argc, char const *argv[])
 		out = append_file;
 	}
 	else
-		out = stderr;
+		out = stdout;
 
 	printf("Arguments given: n %d l %s d %d\n",max_groups,config_name,closing_time);
 
@@ -156,9 +160,11 @@ int main(int argc, char const *argv[])
 	for (i=0;i<tables_num;i++)
 	{
 		tables[i].group_id = -1;
+		tables[i].group_size = -1;
 		tables[i].group_activity = -1;
 		tables[i].waiter_id = -1;
 		tables[i].capacity = table_capacities[i];
+		sem_init(&(tables[i].table_service),1,0);
 		printf("TABLE %d: capacity is %d\n",i+1,tables[i].capacity);
 	}
 	printf("--DONE INITIALISING TABLES--\n\n");
@@ -187,7 +193,7 @@ int main(int argc, char const *argv[])
 	shared_info->bar.group_size = -1;
 	shared_info->bar.capacity = bar_size;
 	sem_init(&shared_info->tables.waiter_busy,1,0);
-	sem_init(&shared_info->tables.waiter_queue,1,1);
+	sem_init(&shared_info->tables.waiter_table,1,1);
 	sem_init(&shared_info->stats.stats_write,1,1);
 	shared_info->stats.people_at_tables = 0;
 	shared_info->stats.people_at_bar = 0;
@@ -212,7 +218,7 @@ int main(int argc, char const *argv[])
 		free(tables);
 		free(table_capacities);
 		
-		if (append_file == NULL)
+		if (doorman_no_prints || append_file == NULL)
 		{
 			execl("./doorman","./doorman", "-d",doorman_max_time, "-s", id_string,NULL);
 			perror("execl");
@@ -226,7 +232,7 @@ int main(int argc, char const *argv[])
 	}
 
 	/*Call waiters*/
-	char * waiter_max_time = "1";
+	char * waiter_max_time = "5";
 	char * waiter_moneyamount = "20";
 	for (i=0;i<waiters;i++)
 	{
@@ -236,7 +242,7 @@ int main(int argc, char const *argv[])
 			free(tables);
 			free(table_capacities);
 
-			if (append_file == NULL)
+			if (waiter_no_prints || append_file == NULL)
 			{
 				execl("./waiter","./waiter", "-d", waiter_max_time,"-m", waiter_moneyamount, "-s", id_string,NULL);
 				perror("execl");
@@ -265,7 +271,7 @@ int main(int argc, char const *argv[])
 
 			sprintf(customer_people,"%d",group_size);
 			
-			if (append_file == NULL)
+			if (customer_no_prints || append_file == NULL)
 			{
 				execl("./customer","./customer", "-n", customer_people,"-d",customer_max_time, "-s", id_string,NULL);
 				perror("execl");
@@ -303,30 +309,51 @@ int main(int argc, char const *argv[])
 		i++;
 	}
 
-	/*Call doorman so he can go home*/
-	fflush(out);
+	/*Call doorman and waiters so they can go home*/
+	shared_info->restaurant_open = 0;
+
 	sem_wait(&shared_info->append_file);
 	fprintf(out, "\nRestaurant calling doorman so he can go home\n");
 	fflush(out);
 	sem_post(&shared_info->append_file);
 
-	shared_info->restaurant_open = 0;
 	sem_post(&shared_info->doorman.doorman_busy);
+	waitpid(-1,NULL,0);/*wait for doorman to leave*/
+	sem_wait(&shared_info->append_file);
+	fprintf(out, "\nRestaurant: Doorman left the restaurant\n");
+	fflush(out);
+	sem_post(&shared_info->append_file);
 
-	pid = waitpid(-1,NULL,0);/*wait for doorman to leave the restaurant*/
+	sem_wait(&shared_info->append_file);
+	fprintf(out, "\nRestaurant calling waiters so they can go home\n");
+	fflush(out);
+	sem_post(&shared_info->append_file);
+
+	for (i=0;i<waiters;i++)
+		sem_post(&shared_info->tables.waiter_busy);
+
+	for (i=0;i<waiters;i++)
+	{
+		pid = waitpid(-1,NULL,0);/*wait for waiters to leave*/
+		sem_wait(&shared_info->append_file);
+		fprintf(out, "\nRestaurant: Waiter %d left the restaurant\n",pid);
+		fflush(out);
+		sem_post(&shared_info->append_file);
+	}
 
 	/*All children processes have ended.No reason to use a semaphore*/
 	fprintf(out, "\nRestaurant closing!\n");
 	print_stats(out,shared_info);
 	fflush(out);
-
 	sem_destroy(&shared_info->append_file);
 	sem_destroy(&shared_info->doorman.doorman_busy);
 	sem_destroy(&shared_info->doorman.doorman_answer);
 	sem_destroy(&shared_info->door.door_queue);
 	sem_destroy(&shared_info->bar.bar_queue);
 	sem_destroy(&shared_info->tables.waiter_busy);
-	sem_destroy(&shared_info->tables.waiter_queue);
+	sem_destroy(&shared_info->tables.waiter_table);
+	for (i=0;i<tables_num;i++)
+		sem_destroy(&(tables[i].table_service));
 	
 
 	err = shmctl ( shared_id , IPC_RMID , 0) ;
