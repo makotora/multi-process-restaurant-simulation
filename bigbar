@@ -1,0 +1,4 @@
+tables 10
+tableSizes 2 2 4 4 6 6 8 8 4 6
+barSize 40 
+waiters 5

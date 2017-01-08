@@ -1,29 +1,29 @@
-OBJS = restaurant.o shared.o functions.o
+OBJS = restaurant.o shared.o
 EOBJS = doorman.o customer.o waiter.o
 EXECS = doorman customer waiter
-SOURCE	= restaurant.c shared.c doorman.c customer.c functions.c waiter.c
-HEADER  = shared.h functions.h
+SOURCE	= restaurant.c shared.c doorman.c customer.c waiter.c
+HEADER  = shared.h
 OUT  	= restaurant
 
 CC=gcc
 DEBUG= -g
 CFLAGS= -c -Wall $(DEBUG)
-LFLAGS= -pthread -Wall $(DEBUG)
+LFLAGS= -Wall $(DEBUG)
 
 restaurant: $(OBJS) $(EOBJS) $(EXECS)
-	$(CC) $(LFLAGS) $(OBJS) -o $(OUT)
+	$(CC) $(LFLAGS) $(OBJS) -o $(OUT) -lpthread
 
 restaurant.o: restaurant.c
 	$(CC) $(CFLAGS) restaurant.c
 
 doorman: shared.o doorman.o
-	$(CC) $(LFLAGS) shared.o doorman.o -o doorman
+	$(CC) $(LFLAGS) shared.o doorman.o -o doorman -lpthread
 
 waiter: shared.o waiter.o
-	$(CC) $(LFLAGS) shared.o waiter.o -o waiter
+	$(CC) $(LFLAGS) shared.o waiter.o -o waiter -lpthread
 
 customer: shared.o customer.o
-	$(CC) $(LFLAGS) shared.o customer.o -o customer
+	$(CC) $(LFLAGS) shared.o customer.o -o customer -lpthread
 
 shared.o: shared.c
 	$(CC) $(CFLAGS) shared.c
@@ -36,9 +36,6 @@ waiter.o: waiter.c
 
 customer.o: customer.c
 	$(CC) $(CFLAGS) customer.c
-
-functions.o: functions.c
-	$(CC) $(CFLAGS) functions.c
 
 clean:
 	rm -f $(OBJS) $(EOBJS) $(EXECS) $(OUT)

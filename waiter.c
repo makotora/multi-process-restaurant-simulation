@@ -97,7 +97,7 @@ int main(int argc, char const *argv[])
 
 
 	void * shared_memory = (void *) shmat(shared_id, (void*)0, 0);
-	if ( (int) shared_memory == -1)
+	if ( (long int) shared_memory == -1)
 	{
 		perror("shmat");
 	}
@@ -108,9 +108,7 @@ int main(int argc, char const *argv[])
 	pid = getpid();
 
 	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nWaiter %d arrived with max_period %d , max_money %d and shmdid %d\n",pid,max_period,max_money,shared_id);
-	print_shared_struct(out, shared_info);
-	print_shared_tables(out, shared_tables, shared_info->tables_num);
+	fprintf(out, "\n\t\tWaiter %d arrived with max_period %d , max_money %d and shmdid %d\n",pid,max_period,max_money,shared_id);
 	fflush(out);
 	sem_post(&shared_info->append_file);
 
@@ -123,13 +121,13 @@ int main(int argc, char const *argv[])
 		/*so he needs to 'wake' up another waiter to do something*/
 
 		sem_wait(&shared_info->append_file);
-		fprintf(out, "\nWaiter %d is waiting for someone to call him\n",pid);
+		fprintf(out, "\n\t\tWaiter %d is waiting for someone to call him\n",pid);
 		fflush(out);	
 		sem_post(&shared_info->append_file);
 
 		sem_wait(&shared_info->tables.waiter_busy);
 		sem_wait(&shared_info->append_file);
-		fprintf(out, "\nWaiter %d was called by someone\n",pid);
+		fprintf(out, "\n\t\tWaiter %d was called by someone\n",pid);
 		fflush(out);
 		sem_post(&shared_info->append_file);
 
@@ -139,8 +137,7 @@ int main(int argc, char const *argv[])
 			break;
 
 		sem_wait(&shared_info->append_file);
-		fprintf(out, "\nWaiter %d is looking at tables\n",pid);
-		print_shared_tables(out, shared_tables, shared_info->tables_num);
+		fprintf(out, "\n\t\tWaiter %d is looking at tables\n",pid);
 		fflush(out);
 		sem_post(&shared_info->append_file);
 		action_period = ( rand() % max_period ) + 1;/*time action will take*/
@@ -149,17 +146,22 @@ int main(int argc, char const *argv[])
 		for (i=0;i<tables_num;i++)
 		{
 
-			if (shared_tables[i].group_id != -1 && shared_tables[i].waiter_id == -1)/*look if table has a group and no waiter*/
+			if (shared_tables[i].group_id > -1 && shared_tables[i].waiter_id == -1)/*look if table has a group and no waiter*/
 			{				
 				/*make sure no other waiter is looking to "take" a table at the same time*/
 				sem_wait(&shared_info->tables.waiter_table);
 				if (shared_tables[i].waiter_id == -1)/*check again.maybe someone arrived at the table faster!*/
 				{/*take this table if noone has already*/
 					shared_tables[i].waiter_id = pid;
+					sem_post(&shared_info->tables.waiter_table);/*this table is mine and others can now see so*/
+					
 					sem_wait(&shared_info->append_file);
-					fprintf(out, "\nWaiter %d took over table %d\n",pid,i);
+					fprintf(out, "\n\t\tWaiter %d took over table %d\n",pid,i);
 					fflush(out);
 					sem_post(&shared_info->append_file);
+
+					did_something = 1;
+					break;
 				}
 				sem_post(&shared_info->tables.waiter_table);
 			}
@@ -172,11 +174,12 @@ int main(int argc, char const *argv[])
 
 					sleep(action_period);/*take their order and bring their food*/
 					sem_wait(&shared_info->append_file);
-					fprintf(out, "\nWaiter %d took order from table %d and brought their food\n",pid,i);
+					fprintf(out, "\n\t\tWaiter %d took order from table %d and brought their food\n",pid,i);
 					fflush(out);
 					sem_post(&shared_info->append_file);
+					shared_tables[i].group_activity = 1;/*note that they are eating*/	
+
 					sem_post(&(shared_tables[i].table_service));/*give them their food*/
-					shared_tables[i].group_activity = 1;/*note that they are eating*/
 					/*Note that only this waiter comes to this table*/
 					/*So we noting that they are eating doesnt need a semaphore*/
 					sem_wait(&shared_info->stats.stats_write);
@@ -190,27 +193,37 @@ int main(int argc, char const *argv[])
 
 					sleep(action_period);/*bring the check and get paid*/
 					moneymoney = ( rand() % max_money ) + 1;
-					sem_wait(&shared_info->append_file);
-					fprintf(out, "\nWaiter %d brought the check and got paid %d$ from table %d\n",pid,moneymoney,i);
-					fflush(out);
-					sem_post(&shared_info->append_file);
-					sem_post(&(shared_tables[i].table_service));/*say goodbye and thank you,dont forget about thank you*/
-
 					sem_wait(&shared_info->stats.stats_write);
 					shared_info->stats.income += moneymoney;/*Give cashier the money*/
 					/*Dont steal any money!NO TIPS!*/
 					shared_info->stats.people_at_tables -= shared_tables[i].group_size;
-					shared_info->stats.groups_gone += 1;
-					print_stats(out, shared_info);
+					shared_info->stats.groups_gone++;
 					sem_post(&shared_info->stats.stats_write);
+
+					shared_tables[i].income += moneymoney;/*no need for a semaphore only this waiter is at this table*/
+
+					sem_wait(&shared_info->append_file);
+					fprintf(out, "\n\t\tWaiter %d brought the check and got paid %d$ from table %d\n",pid,moneymoney,i);
+					fflush(out);
+					sem_post(&shared_info->append_file);
 
 					/*CLEAN THE TABLE:reset table vars*/
 					/*no need for semaphores,only this waiter is here*/
+					sem_wait(&shared_info->tables.table_change);/*note that a table was freed*/
+					shared_info->tables.free_tables++;
 					shared_tables[i].group_id = -1;
 					shared_tables[i].group_size = -1;
 					shared_tables[i].group_activity = -1;
 					shared_tables[i].waiter_id = -1;/*table is no longer mine*/
 					/*ITS IMPORTANT TO DO ^THIS^ LAST*/
+					sem_post(&shared_info->tables.table_change);
+
+					sem_post(&(shared_tables[i].table_service));/*say goodbye and thank you,dont forget about thank you*/
+
+					sem_wait(&shared_info->append_file);
+					fprintf(out, "\n\t\tWaiter %d is noting that table %d is now empty\n",pid,i);
+					fflush(out);
+					sem_post(&shared_info->append_file);
 
 					break;
 				}
@@ -220,7 +233,7 @@ int main(int argc, char const *argv[])
 		if (!did_something)/*If this waiter did nothing,call another waiter*/
 		{
 			sem_wait(&shared_info->append_file);
-			fprintf(out, "\nWaiter %d is calling another waiter\n",pid);
+			fprintf(out, "\n\t\tWaiter %d is calling another waiter\n",pid);
 			fflush(out);
 			sem_post(&shared_info->append_file);
 			sleep(action_period);/*find another waiter*/ 
@@ -230,7 +243,7 @@ int main(int argc, char const *argv[])
 
 
 	sem_wait(&shared_info->append_file);
-	fprintf(out, "\nWaiter %d leaving the restaurant\n",pid);
+	fprintf(out, "\n\t\tWaiter %d leaving the restaurant\n",pid);
 	fflush(out);
 	sem_post(&shared_info->append_file);
 	
@@ -239,6 +252,8 @@ int main(int argc, char const *argv[])
 	{
 		perror ("shmdt") ;
 	}
+
+	fclose(out);
 
 	return 0;
 
